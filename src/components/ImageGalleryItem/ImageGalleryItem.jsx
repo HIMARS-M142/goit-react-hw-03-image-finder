@@ -1,4 +1,3 @@
-import { Modal } from 'components/Modal/Modal';
 import css from '../Styles.module.css';
 
 export const ImageGalleryItem = ({ webformatURL, largeImageURL, tags }) => {

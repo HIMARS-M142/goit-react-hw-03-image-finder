@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import css from '../Styles.module.css';
-import { render } from '@testing-library/react';
 
 export class Modal extends Component {
   state = {

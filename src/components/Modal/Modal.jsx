@@ -1,11 +1,26 @@
+import { Component } from 'react';
 import css from '../Styles.module.css';
+import { render } from '@testing-library/react';
 
-export const Modal = ({ modalImage, onBackdropClose }) => {
-  return (
-    <div onMouseDown={onBackdropClose} className={css.Overlay}>
-      <div className={css.Modal}>
-        <img src={modalImage} alt="" />
+export class Modal extends Component {
+  state = {
+    modalIsOpen: false,
+  };
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.props.onEscClose);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.props.onEscClose);
+  }
+
+  render() {
+    return (
+      <div onMouseDown={this.props.onBackdropClose} className={css.Overlay}>
+        <div className={css.Modal}>
+          <img src={this.props.modalImage} alt="" />
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+}

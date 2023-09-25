@@ -13,23 +13,17 @@ export class App extends Component {
     searchValue: '',
     currentPage: 1,
     modalImage: '',
-    modalIsOpen: false,
   };
   onInputFind = value => {
     this.setState({ searchValue: value });
   };
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.onEscClose);
-  }
   componentDidUpdate(_, prevState) {
     if (prevState.searchValue !== this.state.searchValue) {
       this.fetchImages();
     }
   }
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onEscClose);
-  }
+
   fetchImages = async () => {
     this.setState({
       currentPage: 2,
@@ -38,7 +32,11 @@ export class App extends Component {
 
     try {
       const { hits } = await getSearchApi(this.state.searchValue);
-      this.setState({ images: hits });
+      if (hits.length === 0) {
+        this.setState({ images: null });
+      } else {
+        this.setState({ images: hits });
+      }
     } catch (error) {
       alert(error);
     } finally {
@@ -71,16 +69,16 @@ export class App extends Component {
       });
     }
   };
+  onBackdropClose = e => {
+    if (e.target === e.currentTarget) {
+      this.setState({ modalIsOpen: false });
+    }
+  };
   onEscClose = e => {
     if (e.code !== 'Escape') {
       return;
     }
     this.setState({ modalIsOpen: false });
-  };
-  onBackdropClose = e => {
-    if (e.target === e.currentTarget) {
-      this.setState({ modalIsOpen: false });
-    }
   };
   render() {
     return (
@@ -89,6 +87,7 @@ export class App extends Component {
           <Modal
             onBackdropClose={this.onBackdropClose}
             modalImage={this.state.modalImage}
+            onEscClose={this.onEscClose}
           />
         )}
         <Searchbar onFind={this.onInputFind} />

@@ -2,10 +2,6 @@ import { Component } from 'react';
 import css from '../Styles.module.css';
 
 export class Modal extends Component {
-  state = {
-    modalIsOpen: false,
-  };
-
   componentDidMount() {
     window.addEventListener('keydown', this.props.onEscClose);
   }

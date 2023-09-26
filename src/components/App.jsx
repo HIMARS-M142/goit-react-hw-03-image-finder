@@ -9,10 +9,11 @@ import { Modal } from './Modal/Modal';
 export class App extends Component {
   state = {
     isLoading: false,
-    images: null,
+    images: [],
     searchValue: '',
     currentPage: 1,
     modalImage: '',
+    buttonShow: false,
   };
   onInputFind = value => {
     this.setState({ searchValue: value });
@@ -20,22 +21,34 @@ export class App extends Component {
 
   componentDidUpdate(_, prevState) {
     if (prevState.searchValue !== this.state.searchValue) {
+      this.setState({ currentPage: 1, images: [] });
+    }
+    if (
+      prevState.searchValue !== this.state.searchValue ||
+      prevState.currentPage !== this.state.currentPage
+    ) {
       this.fetchImages();
     }
   }
 
   fetchImages = async () => {
     this.setState({
-      currentPage: 2,
       isLoading: true,
     });
 
     try {
-      const { hits } = await getSearchApi(this.state.searchValue);
-      if (hits.length === 0) {
-        this.setState({ images: null });
-      } else {
-        this.setState({ images: hits });
+      const { hits, total } = await getSearchApi(
+        this.state.searchValue,
+        this.state.currentPage
+      );
+
+      this.setState(prev => ({ images: [...prev.images, ...hits] }));
+      this.setState({
+        buttonShow: true,
+      });
+
+      if (total < 12 || hits.length < 12) {
+        this.setState({ buttonShow: false });
       }
     } catch (error) {
       alert(error);
@@ -43,23 +56,10 @@ export class App extends Component {
       this.setState({ isLoading: false });
     }
   };
-  fetchMoreImages = async () => {
-    this.setState({ isLoading: true });
-    try {
-      const { hits } = await getSearchApi(
-        this.state.searchValue,
-        this.state.currentPage
-      );
-      this.setState(prev => ({ images: [...prev.images, ...hits] }));
-    } catch (error) {
-      alert(error);
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  };
   onLoadMoreClick = () => {
-    this.fetchMoreImages();
-    this.setState(prev => ({ currentPage: prev.currentPage + 1 }));
+    this.setState(prev => ({
+      currentPage: prev.currentPage + 1,
+    }));
   };
   onImageClick = e => {
     if (e.target !== e.currentTarget) {
@@ -104,7 +104,9 @@ export class App extends Component {
             visible={true}
           />
         )}
-        {this.state.images && <Button onLoadMoreClick={this.onLoadMoreClick} />}
+        {this.state.buttonShow && (
+          <Button onLoadMoreClick={this.onLoadMoreClick} />
+        )}
       </div>
     );
   }
